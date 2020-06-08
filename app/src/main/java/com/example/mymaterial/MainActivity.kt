@@ -1,10 +1,11 @@
 package com.example.mymaterial
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.LinearLayout
 import android.widget.Toast
+import com.example.mymaterial.eliza.Eliza
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.content_main.*
 
@@ -19,6 +20,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        initEliza()
         initRecognizer()
         setListen()
     }
@@ -27,6 +29,14 @@ class MainActivity : AppCompatActivity() {
         stopTTS()
         stopRecognizer()
         super.onDestroy()
+    }
+
+    override fun onBackPressed() {
+        if (content_chat.visibility == View.VISIBLE) {
+            content_main.visibility = View.VISIBLE
+            content_chat.visibility = View.GONE
+        } else
+            super.onBackPressed()
     }
 
     private fun setListen() {
@@ -52,8 +62,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         ll_company.setOnClickListener {
-
+            content_main.visibility = View.GONE
+            content_chat.visibility = View.VISIBLE
+            //startActivity(Intent(this, ChatActivity::class.java))
         }
+    }
+
+    private fun initEliza() {
+        val eliza = Eliza(resources.openRawResource(R.raw.script))
+        speakText("zh-tw", eliza.initial)
+
+        eliza.finished()
     }
 
     private fun initRecognizer() {

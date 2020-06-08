@@ -11,6 +11,11 @@
         android:id="@+id/content_main"
         layout="@layout/content_main"/>
 
+    <include
+        android:id="@+id/content_chat"
+        android:visibility="gone"
+        layout="@layout/content_chat"/>
+
     <com.airbnb.lottie.LottieAnimationView
         android:id="@+id/load"
         android:layout_width="200dp"
