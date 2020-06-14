@@ -39,3 +39,4 @@ fun View?.alphaAnimation(show: Boolean, alphaStart: Float = 1.0f,
 fun String.contains(list: Array<String>): Boolean {
     return list.any { contains(it) }
 }
+

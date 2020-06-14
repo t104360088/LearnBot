@@ -7,7 +7,10 @@ import android.view.View
 import android.widget.Toast
 import com.example.mymaterial.eliza.Eliza
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.content_chat.*
 import kotlinx.android.synthetic.main.content_main.*
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 class MainActivity : AppCompatActivity() {
 
@@ -16,11 +19,19 @@ class MainActivity : AppCompatActivity() {
     private var isRecording = false
     private var secondResult = false
 
+    private lateinit var initial: ArrayList<String>
+    private lateinit var finl: ArrayList<String>
+    private lateinit var reply: ArrayList<String>
+    private lateinit var chatList: ArrayList<Message>
+    private lateinit var adapter: ChatAdapter
+    private var isChating = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         initEliza()
+        initAcapone()
         initRecognizer()
         setListen()
     }
@@ -32,7 +43,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (content_chat.visibility == View.VISIBLE) {
+        if (isChating) {
+            isChating = false
+            stopTTS()
             content_main.visibility = View.VISIBLE
             content_chat.visibility = View.GONE
         } else
@@ -62,9 +75,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         ll_company.setOnClickListener {
+            isChating = true
             content_main.visibility = View.GONE
             content_chat.visibility = View.VISIBLE
-            //startActivity(Intent(this, ChatActivity::class.java))
+
+            val text = initial.random()
+            val msg = Message(0, text)
+
+            speakText("zh-tw", text)
+            chatList = arrayListOf(msg)
+
+            adapter = ChatAdapter(this, chatList)
+            listview.adapter = adapter
         }
     }
 
@@ -73,6 +95,28 @@ class MainActivity : AppCompatActivity() {
         speakText("zh-tw", eliza.initial)
 
         eliza.finished()
+    }
+
+    private fun initAcapone() {
+        initial = arrayListOf()
+        finl = arrayListOf()
+        reply = arrayListOf()
+        val isr = InputStreamReader(resources.openRawResource(R.raw.script2))
+        val br = BufferedReader(isr)
+        var s = br.readLine()
+
+        try {
+            while (s != null) {
+                s = br.readLine()
+
+                when {
+                    s.startsWith("initial: ") -> initial.add(s.removePrefix("initial: "))
+                    s.startsWith("final: ") -> finl.add(s.removePrefix("final: "))
+                    s.startsWith("reply: ") -> reply.add(s.removePrefix("reply: "))
+                }
+            }
+        } catch (ignored: Exception) {
+        }
     }
 
     private fun initRecognizer() {
@@ -104,18 +148,35 @@ class MainActivity : AppCompatActivity() {
                 if (secondResult) return
                 secondResult = true
 
-                Toast.makeText(this@MainActivity, answer, Toast.LENGTH_SHORT).show()
-
                 with(answer) {
-                    val reply = when {
+                    val text = when {
                         contains("學習規劃") -> "正在進行規劃"
                         contains("進行學習") -> "請問想學習什麼呢"
                         contains("陪伴") -> "請等我一下"
                         contains(arrayOf("成果", "評量")) -> "正在統計學習的成果"
-                        else -> "很抱歉我不明白你的意思"
+                        contains(arrayOf("謝謝你", "謝謝您")) -> "你太客氣了"
+                        contains(arrayOf("掰掰", "再見", "拜拜")) -> finl.random()
+                        else -> reply.random()
                     }
 
-                    speakText("zh-tw", reply)
+                    speakText("zh-tw", text)
+
+                    if (isChating) {
+                        val myMsg = Message(1, answer)
+                        val sysMsg = Message(0, text)
+
+                        chatList.add(myMsg)
+                        chatList.add(sysMsg)
+                        adapter.notifyDataSetChanged()
+
+                        listview.post {
+                            val lastVisible = listview.lastVisiblePosition
+                            val scrollDown = adapter.count > lastVisible
+
+                            if (scrollDown)
+                                listview.setSelection(adapter.count)
+                        }
+                    }
                 }
             }
         })
