@@ -163,7 +163,7 @@ class MainActivity : AppCompatActivity() {
                 with(answer) {
                     val text = when {
                         contains("學習規劃") -> "正在進行規劃"
-                        contains("進行學習") -> "請問想學習什麼呢"
+                        contains("課程學習") -> "請問想學習什麼呢"
                         contains("陪伴") -> "請等我一下"
                         contains(arrayOf("成果", "評量")) -> "正在統計學習的成果"
                         contains(arrayOf("謝謝你", "謝謝您")) -> "你太客氣了"

@@ -9,6 +9,6 @@ class LearnActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_learn)
 
-        title = "進行學習"
+        title = "課程學習"
     }
 }
