@@ -74,6 +74,18 @@ class MainActivity : AppCompatActivity() {
                 }
         }
 
+        ll_plan.setOnClickListener {
+            startActivity(Intent(this, PlanActivity::class.java))
+        }
+
+        ll_review.setOnClickListener {
+            startActivity(Intent(this, ReviewActivity::class.java))
+        }
+
+        ll_learn.setOnClickListener {
+            startActivity(Intent(this, LearnActivity::class.java))
+        }
+
         ll_company.setOnClickListener {
             isChating = true
             content_main.visibility = View.GONE
